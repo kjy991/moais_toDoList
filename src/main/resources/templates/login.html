@@ -1,0 +1,248 @@
+<!--로그인 회원가입 양식폼 [출처] HTML/CSS 로그인, 회원가입 폼 실습|작성자 김써니의 코딩기록-->
+<!--https://blog.naver.com/PostView.nhn?blogId=haha7037&logNo=221854071876&parentCategoryNo=&categoryNo=32&viewDate=&isShowPopularPosts=true&from=search-->
+
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>toDoList</title>
+</head>
+<body>
+<div id="con">
+    <div id="login">
+        <div id="login_form"><!--로그인 폼-->
+            <form>
+                <h3 class="login" style="letter-spacing:-1px;">Sign in to Web</h3>
+
+                <hr>
+                <label>
+                    <!-- <span>ID</span> -->
+                    <p style="text-align: left; font-size:12px; color:#666">Username</p>
+                    <input type="text" id="inputId" placeholder="아이디를 입력" class="size">
+                    <!-- <input type="submit" value="확인"> -->
+                    <p></p>
+                </label>
+
+                <label>
+                    <!-- <span>PW</span> -->
+                    <p style="text-align: left; font-size:12px; color:#666">Password </p>
+                    <input type="password" id="inputPassword" placeholder="비밀번호를 입력" class="size" autocomplete="off" >
+                    <!-- <input type="submit" value="확인"> -->
+                </label>
+
+<!--                <p>-->
+<!--                    <input type="submit" value="Sign in" class="btn" onclick="doLogin()">-->
+<!--                </p>-->
+            </form>
+            <button class="btn btn-lg btn-primary btn-block btn-signin login-button" onclick="doLogin()">로그인</button>
+            <hr>
+            <p class="find">
+<!--                <span><a href="/join.html">회원가입</a></span>-->
+                <span><a href="/join" >회원가입</a><</span>
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+<script>
+    /**
+     * 로그인 실행
+     * (예정) 뒤로가기 했을 때 처리
+     */
+    function doLogin() {
+        console.log("들어옴")
+        const id = $("#inputId").val(); // ID 폼 값
+        const password = $("#inputPassword").val(); // Password 폼 값
+
+        if (id.trim().length < 1) { // ID 폼 빈칸체크해서 빈칸이면 알림메시지를 띄우고 현재 함수 종료
+            alert("ID를 입력해주세요.");
+            $("#loginIdForm").focus();
+            return;
+        } else if (password.trim().length < 1) { // Password 폼 빈칸체크해서 빈칸이면 알림메시지를 띄우고 현재 함수 종료
+            alert("Password 를 입력해주세요.");
+            $("#loginPasswordForm").focus();
+            return;
+        }
+
+        // 서버와 로그인 통신
+        $.ajax({
+            url: "../login/do",
+            method: "POST",
+            data: {"id": id, "password": password},
+            dataType: "json",
+            success: function (data) { // 로그인 연결 성공 시 처리 (아이디, 패스워드 일치하지 않아도 여기에 적용된다.)
+                localStorage.clear(); // 로그인성공하면 로컬스토리지 데이터 리셋시킴
+                if (data.resultCode === 0) { // 로그인 성공
+                    location.href = "../" // 로그인 후 메인 화면으로 이동
+                } else if (data.resultCode === 1) { // 예외 1) 아이디와 비밀번호가 일치하지 않음
+                    alert("ID와 Password 가 일치하지 않습니다.");
+                } else if (data.resultCode === 2) { // 예외 2) 아이디와 비밀번호 데이터가 잘못들어옴
+                    alert("아이디나 비밀번호 데이터가 손실되었습니다.");
+                } else {
+                    alert("알 수 없는 에러입니다. 문의해주세요");
+                }
+            },
+            error: function (xhr, status, err) { // 로그인 연결 실패 시 처리 (네트워크 연결 상태 등 외부 원인으로 발생하는 에러 처리)
+                alert(status + "\n" + err);
+            }
+        });
+    }
+</script>
+
+
+<style>
+    @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 100;
+        src: url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Thin.woff2) format('woff2'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Thin.woff) format('woff'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Thin.otf) format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 300;
+        src: url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Light.woff2) format('woff2'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Light.woff) format('woff'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Light.otf) format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 400;
+        src: url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Regular.woff2) format('woff2'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Regular.woff) format('woff'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Regular.otf) format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 500;
+        src: url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Medium.woff2) format('woff2'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Medium.woff) format('woff'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Medium.otf) format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 700;
+        src: url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.woff2) format('woff2'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.woff) format('woff'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.otf) format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 900;
+        src: url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Black.woff2) format('woff2'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Black.woff) format('woff'), url(//fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Black.otf) format('opentype');
+    }
+
+    body {
+        margin: 0 auto;
+    }
+
+    /* body, table, div, p ,span{font-family:'Nanum Gothic';} */
+    body, table, div, p, span {
+        font-family: 'Noto Sans KR';
+    }
+
+    a {
+        text-decoration: none;
+        color: #333;
+    }
+
+    #con {
+        width: 100%;
+        height: 100vh;
+        background-color: #f5f1ee;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        padding: 0;
+    }
+
+    #login {
+        width: 600px;
+        height: 600px;
+        margin: 0 auto;
+        /* position: relative; */
+        /* background:#ddd; */
+    }
+
+    #login_form {
+        /* text-align:center; */
+        border-radius: 10px;
+        padding: 50px;
+        background: #fff;
+        text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .login {
+        font-size: 25px;
+        font-weight: 900;
+        color: #333;
+    }
+
+    .size {
+        width: 300px;
+        height: 30px;
+        padding-left: 10px;
+        background-color: #f4f4f4;
+        /* margin-left:10px; */
+        border: none;
+        border-radius: 5px;
+    }
+
+    .btn {
+        width: 310px;
+        height: 40px;
+        font-size: 15px;
+        background-color: #df3278;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .btn:hover {
+        background: #ca296a;
+    }
+
+    hr {
+        margin-top: 20px;
+        background: #eee;
+
+    }
+
+    .find {
+        color: #ddd;
+        font-size: 12px;
+    }
+
+    .find span {
+        padding-left: 10px;
+    }
+
+    .find span::before {
+        content: '|';
+        color: #333;
+        padding-right: 10px;
+    }
+
+    .find span:nth-child(1):before {
+        content: none;
+    }
+
+    .find span:nth-child(1) {
+        padding-left: 0px;
+    }
+
+    .find a:hover {
+        color: #707070;
+    }
+</style>
