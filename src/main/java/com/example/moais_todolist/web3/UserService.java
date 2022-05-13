@@ -1,14 +1,14 @@
 package com.example.moais_todolist.web3;
 
-import java.util.HashMap;
+import java.util.Map;
 
 interface UserService {
 
-    int login(String id, String password);
+    Boolean login(String id, String password);
 
-    int checkUserId(HashMap data);
+    int checkUserId(Map<String, String> data);
 
-    int join(HashMap data);
+    int join(Map<String, String> data);
 }
 
 

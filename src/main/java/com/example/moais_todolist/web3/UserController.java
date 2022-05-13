@@ -1,16 +1,11 @@
 package com.example.moais_todolist.web3;
 
-
-import lombok.AllArgsConstructor;
-import lombok.val;
-import org.aspectj.apache.bcel.classfile.Code;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
-import org.springframework.security.config.authentication.PasswordEncoderParser;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -21,27 +16,29 @@ import java.util.regex.Pattern;
 @CrossOrigin
 //@AllArgsConstructor
 @Controller
-@RequestMapping("/")
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
-    UserService userService ;
+    UserService userService;
+
+    @Autowired
+    UserDetailsService userDetailsService;
 
     /**
      * 로그인 페이지로 이동
      */
-    @GetMapping("/login")
+    @GetMapping(value = {"/login"})
     public String login(HttpSession session) {
-        if (session.getAttribute("userInfo") != null) {
-            return "redirect:/";
-        }
+
         return "/login";
     }
 
     /**
-     * 로그인 페이지로 이동
+     * 로그인
      */
     @GetMapping("/login/do")
+    @ResponseBody
     public Map doLogin(HttpSession session, @RequestParam(name = "id") String id, @RequestParam(name = "password") String password) {
         HashMap<Boolean, String> result = new HashMap<>();
 
@@ -51,11 +48,16 @@ public class UserController {
             return result;
         }
 
-        int value = userService.login(id, password);
-        if (value != 0) {
+        Boolean value = userService.login(id, password);
+
+        if (value == true) {
+            UserDetails login = userDetailsService.loadUserByUsername(id);
+
+        } else {
             result.put(false, "아이디 또는 비밀번호가 일치하지 않습니다.");
             return result;
         }
+
 
         session.setMaxInactiveInterval(60 * 10); // 10분 세션
 
@@ -63,15 +65,30 @@ public class UserController {
         return result;
     }
 
+
+    /**
+     * 회원가입 페이지로 이동
+     */
+    @GetMapping("/join")
+    public String join(HttpSession session) {
+        if (session.getAttribute("userInfo") != null) {
+            return "redirect:/";
+        }
+        return "/join";
+    }
+
+
     /**
      * 사용자 등록
      */
     @PostMapping("/join/do")
-    public Map doJoin(@RequestParam HashMap data) {
+    @ResponseBody
+    public HashMap<Boolean, String> doJoin(@RequestParam HashMap<String, String> data) {
         HashMap<Boolean, String> result = new HashMap<>();
-
         HashMap<Boolean, String> check = dataNullCheck(data, result);
-        if (check != null) return check;
+        if (check != null) {
+            return check;
+        }
 
         /**아이디 중복체크 */
         int checkCode = userService.checkUserId(data);
@@ -86,15 +103,14 @@ public class UserController {
             result.put(false, "회원가입에 실패 했습니다.");
             return result;
         }
+
+        result.put(true, "회원가입이 되었습니다.");
+
         return result;
     }
 
     /**
      * 데이터가 잘 넘어 왔는지 검사
-     *
-     * @param data
-     * @param result
-     * @return
      */
     @Nullable
     private HashMap<Boolean, String> dataNullCheck(HashMap data, HashMap<Boolean, String> result) {
@@ -106,13 +122,18 @@ public class UserController {
             return result;
         }
 
-        if (!engPassNumRegex(data.get("oldPass").toString()) || !engPassNumRegex(data.get("newPass").toString()) || !engPassNumRegex(data.get("newPass1").toString())) { // 넘어온 값이 잘못됐을 경우
-            result.put(false, "잘못된 값이 입력되었습니다.(특수문자는 !@#$%&*만 가능합니다.)");
+        if (!loginRegex(data.get("id").toString())) { // 넘어온 아이디 값이 잘못됐을 경우
+            result.put(false, "아이디 값이 잘못 되었습니다.");
             return result;
         }
+
+        if (!engPassNumRegex(data.get("password").toString())) { // 넘어온 비밀번호 값이 잘못됐을 경우
+            result.put(false, "소문자, 0~9 숫자, 특수문자 8자리 이상 입력해주세요!");
+            return result;
+        }
+
         return null;
     }
-
 
     /**
      * 로그인 정규식 확인
@@ -125,6 +146,6 @@ public class UserController {
      * 영문과 숫자 특수문자 가능 정규식 확인 또는 공백
      */
     public Boolean engPassNumRegex(String data) {
-        return Pattern.matches("^[a-zA-Z0-9-!@#$%&*]*$", data) || Pattern.matches("^\\s*", data);
+        return Pattern.matches("((?=.*[a-z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).{8,})", data);
     }
 }

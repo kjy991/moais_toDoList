@@ -44,6 +44,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter { // 2
     public void configure(AuthenticationManagerBuilder auth) throws Exception { // 9
         auth.userDetailsService(userService)
                 // 해당 서비스(userService)에서는 UserDetailsService 를 implements 해서 loadUserByUsername() 구현해야함 (서비스 참고)
-                .passwordEncoder(new BCryptPasswordEncoder());
+           zz
     }
 }

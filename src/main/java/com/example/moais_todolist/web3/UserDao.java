@@ -1,68 +1,73 @@
 package com.example.moais_todolist.web3;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class UserDao {
-    JdbcTemplate template = null;
 
-    public int login(String id, String password) {
+    @Autowired
+    private NamedParameterJdbcTemplate template;
+
+    private RowMapper<UserVo> rowMapper = BeanPropertyRowMapper.newInstance(UserVo.class);
+
+
+    public UserDao(NamedParameterJdbcTemplate template) {
+        this.template = template;
     }
 
-    public int checkUserId(HashMap data) {
-        var sql = "select count(*) as countId " +
-                "from `user` " +
-                "where id = ? ";
+    public Boolean login(String id, String password) {
 
-         SqlRowSet result = template.queryForRowSet(sql,data.get("id"));
+        return true;
+    }
 
-        return result;
+    public int checkUserId(Map<String, String> data) {
+        String sql = "select count(*) as countId " +
+                "from tdlUser " +
+                "where id = :id ";
+
+        return template.queryForObject(sql, data, Integer.class);
+    }
+
+    public int join(Map<String, String> data) {
 
 
+        var sql = "insert into tdlUser(id,password,createDate) \n" +
+                "values (:id,:password,now())";
 
-        Intrinsics.checkNotNullParameter(data, "data");
+        template.update(sql, data);
+        return 0;
+    }
 
-        String sql1 = "select count(*) as countId from `user` where accountId = ? ";
-
+    public UserVo get(String id) {
+        UserVo userVo = new UserVo();
         try {
-            JdbcTemplate var10000 = new JdbcTemplate();
+            HashMap<String, String> data = new HashMap<>();
+            data.put("id", id);
 
-            if (var10000 != null) {
-                Object[] var10002 = new Object[1];
-                String var10005 = (String)data.get("accountId");
-                if (var10005 == null) {
-                    var10005 = "";
-                }
+            String sql = "select no,id,password,creteDate,deleteDate \n" +
+                    "from tdlUser \n" +
+                    "where id = :id \n";
 
-                var10002[0] = var10005;
-                SqlRowSet var7 = var10000.queryForRowSet(sql, var10002);
-                if (var7 != null) {
-                    SqlRowSet var3 = var7;
-                    int var5 = false;
-                    var3.first();
-                    return var3.getInt("countId");
-                }
-            }
-        } catch (Exception var6) {
-            var6.printStackTrace();
+            ResultSet rs = (ResultSet) template.queryForRowSet(sql, data);
+            userVo.setNo(rs.getInt(1));
+            userVo.setId(rs.getString(2));
+            userVo.setPassword(rs.getString(3));
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-
-
-
-
-    }
-
-    public int join(HashMap data) {
-        var sql = "insert into tdlUser(id,password,createDate,deleteDate) \n" +
-                "values (${data.get('id'})";
-
-        template.queryForObject(sql, Integer.class);
-        return template.queryForObject(sql, Integer.class);
+        return userVo;
     }
 
 }
